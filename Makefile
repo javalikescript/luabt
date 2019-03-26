@@ -31,9 +31,9 @@ CFLAGS_so = -pedantic  \
   -Wstrict-prototypes \
   -I../lua/src
 
-LIBOPT = $(LIBOPT_$(LIBEXT))
+LIBOPT = $(EXTRA_LIBOPT) $(LIBOPT_$(LIBEXT))
 
-CFLAGS += $(CFLAGS_$(LIBEXT))
+CFLAGS = $(EXTRA_CFLAGS) $(CFLAGS_$(LIBEXT))
 
 SOURCES = luabt.c luabt_windows.c luabt_linux.c
 
@@ -49,3 +49,4 @@ clean:
 
 $(OBJS): %.o : %.c $(SOURCES)
 	$(CC) $(CFLAGS) -c -o $@ $<
+  
