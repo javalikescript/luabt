@@ -11,27 +11,6 @@
 
 #include "luabt_base.c"
 
-/*
-make MAIN_TARGET=luabt && cp luabt/bt.dll dist-win32/
-make -f main_mingw.mk luabt && cp luabt/bt.dll dist-win32/
-lua -e "print(require('bt').discoverRadios())"
-lua -e "print(require('bt').discoverDevices())"
-lua -e "print(require('bt').findService('6C:8F:B5:95:80:2B', '1002'))"
-lua -e "print(require('bt').getDeviceInfo('6C:8F:B5:95:80:2B'))"
-lua -e "bt = require('bt') sd = assert(bt.socket('STREAM', 'RFCOMM')) print(bt.connect(sd, 'RFCOMM', '6C:8F:B5:95:80:2B', 7)) bt.closesocket(sd)"
-
-lua -e "print(require('cjson').encode(assert(require('bt').discoverDevices())))"
-lua -e "print(require('cjson').encode(assert(require('bt').findService('6C:8F:B5:95:80:2B', '1002'))))"
-
-lua -e "bt = require('bt') sd = assert(bt.socket('RAW', 'L2CAP')) print(bt.bind(sd, 'L2CAP', '0:0:0:0:0:0', 0)) print(bt.connect(sd, 'L2CAP', '6C:8F:B5:95:80:2B', 0)) bt.closesocket(sd)"
-
-hcitool info 6C:8F:B5:95:80:2B
-l2ping 6C:8F:B5:95:80:2B
-
-Instance Name: Windows phone
- Address: 6C:8F:B5:95:80:2B
- Class: 0x007a020c
-*/
 
 static char * format_error(DWORD err) {
 	DWORD ret = 0;

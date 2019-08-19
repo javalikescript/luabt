@@ -1,0 +1,5 @@
+The Lua bluetooth module provides access to the libbluetooth APIs.
+
+This module is in development, do not use.
+
+Lua bluetooth is covered by the MIT license.

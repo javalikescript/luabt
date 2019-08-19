@@ -21,18 +21,6 @@
 
 #include "luabt_base.c"
 
-/*
-make linux MAIN_TARGET=luabt && cp luabt/bt.so dist-linux/bt.so
-(cd dist-linux && ./lua -e "print(require('bt').discoverDevices())")
-(cd dist-linux && ./lua -e "print(require('cjson').encode(require('bt').discoverDevices()))")
-(cd dist-linux && ./lua -e "print(require('bt').findService('6C:8F:B5:95:80:2B', '1002'))")
-(cd dist-linux && ./lua -e "print(require('cjson').encode(require('bt').findService('6C:8F:B5:95:80:2B', '1002')))")
-
-(cd dist-linux && ./lua -e "bt = require('bt') sd = bt.socket('STREAM', 'RFCOMM') print(bt.connect(sd, 'RFCOMM', '6C:8F:B5:95:80:2B', 7)) bt.closesocket(sd)")
-
-see l2ping:
-(cd dist-linux && sudo ./lua -e "bt = require('bt') sd = assert(bt.socket('RAW', 'L2CAP')) print(bt.bind(sd, 'L2CAP', '0:0:0:0:0:0', 0)) print(bt.connect(sd, 'L2CAP', '6C:8F:B5:95:80:2B', 0)) bt.closesocket(sd)")
-*/
 
 int str2uuid(const char *uuid_str, uuid_t *uuid) {
     uint32_t uuid_int[4];
