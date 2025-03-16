@@ -1,5 +1,3 @@
-#include "luamod.h"
-
 #include <windows.h>
 #include <io.h>
 
@@ -141,12 +139,12 @@ static int bt_socket(lua_State *l) {
 	int type = _check_socket_type(l, 1);
 	int proto = _check_proto(l, 2);
 	if (proto < 0) {
-		RETURN_ERROR(l, "Unsupported protocol")
+		RETURN_ERROR(l, "Unsupported protocol");
 	}
 	sockfd = socket(AF_BTH, type, proto);
 	trace("bt_socket(%d, %d) => %d\n", type, proto, sockfd);
 	if (sockfd == SOCKET_ERROR) {
-		RETURN_ERROR(l, last_wsa_error())
+		RETURN_ERROR(l, last_wsa_error());
 	}
 	lua_pushinteger(l, sockfd);
 	return 1;
@@ -162,7 +160,7 @@ static int bt_bind(lua_State *l) {
 	//if (port == 0) {port = BT_PORT_ANY;}
 	trace("bt_bind(%d, \"%s\", %d)\n", sockfd, addrstr, port);
 	if (WSAStringToAddressA(addrstr, AF_BTH, NULL, (LPSOCKADDR)&sa, &sa_len) != NO_ERROR) {
-		RETURN_ERROR(l, last_wsa_error())
+		RETURN_ERROR(l, last_wsa_error());
 	}
 	sa.addressFamily = AF_BTH;
 	/*
@@ -182,9 +180,9 @@ static int bt_bind(lua_State *l) {
 	 */
 	//sa.serviceClassId;
 	if (bind(sockfd, (LPSOCKADDR)&sa, sa_len) != NO_ERROR) {
-		RETURN_ERROR(l, last_wsa_error())
+		RETURN_ERROR(l, last_wsa_error());
 	}
-	RETURN_SUCCESS(l)
+	RETURN_SUCCESS(l);
 }
 
 static int bt_connect(lua_State *l) {
@@ -196,21 +194,21 @@ static int bt_connect(lua_State *l) {
 	int port = luaL_checkinteger(l, 4);
 	trace("bt_connect(%d, \"%s\", %d)\n", sockfd, addrstr, port);
 	if (WSAStringToAddressA(addrstr, AF_BTH, NULL, (LPSOCKADDR)&sa, &sa_len) != NO_ERROR) {
-		RETURN_ERROR(l, last_wsa_error())
+		RETURN_ERROR(l, last_wsa_error());
 	}
 	sa.addressFamily = AF_BTH;
 	sa.port = port;
 	if (connect(sockfd, (LPSOCKADDR)&sa, sa_len) != NO_ERROR) {
-		RETURN_ERROR(l, last_wsa_error())
+		RETURN_ERROR(l, last_wsa_error());
 	}
-	RETURN_SUCCESS(l)
+	RETURN_SUCCESS(l);
 }
 
 static int bt_closesocket(lua_State *l) {
 	int sockfd = luaL_checkinteger(l, 1);
 	trace("bt_closesocket(%d)\n", sockfd);
 	closesocket(sockfd);
-	RETURN_SUCCESS(l)
+	RETURN_SUCCESS(l);
 }
 
 static int bt_getDeviceInfo(lua_State *l) {
@@ -226,7 +224,7 @@ static int bt_getDeviceInfo(lua_State *l) {
 
 	ZeroMemory(&sa, sizeof(sa_len));
 	if (WSAStringToAddressA(addrstr, AF_BTH, NULL, (LPSOCKADDR)&sa, &sa_len) != NO_ERROR) {
-		RETURN_ERROR(l, last_wsa_error())
+		RETURN_ERROR(l, last_wsa_error());
 	}
 	ZeroMemory(&dinfo, sizeof(BLUETOOTH_DEVICE_INFO));
 	dinfo.dwSize = sizeof(BLUETOOTH_DEVICE_INFO);
@@ -235,7 +233,7 @@ static int bt_getDeviceInfo(lua_State *l) {
   trace("looking for first radio\n");
 	fhandle = BluetoothFindFirstRadio(&p, &rhandle);
 	if (fhandle == NULL) {
-		RETURN_ERROR(l, last_error())
+		RETURN_ERROR(l, last_error());
 	}
 	trace("using radio 0x%p\n", rhandle);
 
@@ -244,7 +242,7 @@ static int bt_getDeviceInfo(lua_State *l) {
 	//trace("BluetoothGetDeviceInfo() => %s\n", last_wsa_error());
 	//trace("BluetoothGetDeviceInfo() => %s\n", last_error());
 	if (!BluetoothFindRadioClose(fhandle)) {
-		RETURN_ERROR(l, last_error())
+		RETURN_ERROR(l, last_error());
 	}
 	if (ret == ERROR_SUCCESS) {
 		ZeroMemory(buffer, sizeof(buffer));
@@ -261,9 +259,9 @@ static int bt_getDeviceInfo(lua_State *l) {
 	} else {
 		// if (ret == ERROR_NOT_FOUND) trace("device not found\n");
 	  trace("Fail to get device info, due to BluetoothGetDeviceInfo() => %lx\n", ret);
-		RETURN_ERROR(l, "Unable to get the device info")
+		RETURN_ERROR(l, "Unable to get the device info");
 	}
-	RETURN_SUCCESS(l)
+	RETURN_SUCCESS(l);
 }
 
 static int bt_discoverRadios(lua_State *l) {
@@ -284,12 +282,12 @@ static int bt_discoverRadios(lua_State *l) {
 	trace("Start discovering radios...\n");
 	m_bt = BluetoothFindFirstRadio(&m_bt_find_radio, &m_radio);
 	if (m_bt == NULL) {
-		RETURN_ERROR(l, last_error())
+		RETURN_ERROR(l, last_error());
 	}
 	do {
 		mbtinfo_ret = BluetoothGetRadioInfo(m_radio, &m_bt_info);
 		if (mbtinfo_ret != ERROR_SUCCESS) {
-			RETURN_ERROR(l, last_error())
+			RETURN_ERROR(l, last_error());
 		}
 		ZeroMemory(buffer, sizeof(buffer));
 		WideCharToMultiByte(CP_UTF8, 0, m_bt_info.szName, wcslen(m_bt_info.szName), buffer, sizeof(buffer), NULL, NULL);
@@ -303,9 +301,9 @@ static int bt_discoverRadios(lua_State *l) {
 	} while(BluetoothFindNextRadio(&m_bt_find_radio, &m_radio));
 
 	if (!BluetoothFindRadioClose(m_bt)) {
-		RETURN_ERROR(l, last_error())
+		RETURN_ERROR(l, last_error());
 	}
-	RETURN_SUCCESS(l)
+	RETURN_SUCCESS(l);
 }
 
 static int bt_discoverDevices(lua_State *l) {
@@ -337,7 +335,7 @@ static int bt_discoverDevices(lua_State *l) {
 	trace("Start discovering devices using timeout %d...\n", duration);
 	found_device = BluetoothFindFirstDevice(&search_criteria, &device_info);
 	if (found_device == NULL) {
-		RETURN_ERROR(l, last_error())
+		RETURN_ERROR(l, last_error());
 	}
 	// table to return all the devices
 	lua_newtable(l);
@@ -356,15 +354,15 @@ static int bt_discoverDevices(lua_State *l) {
 		trace(" Remembered: %s\n", b2s(device_info.fRemembered));
 		// table for this device
 		lua_newtable(l);
-		SET_TABLE_KEY_STRING(l, "name", buffer)
-		SET_TABLE_KEY_STRING(l, "address", addrstr)
-		SET_TABLE_KEY_INTEGER(l, "class", device_info.ulClassofDevice)
+		SET_TABLE_KEY_STRING(l, "name", buffer);
+		SET_TABLE_KEY_STRING(l, "address", addrstr);
+		SET_TABLE_KEY_INTEGER(l, "class", device_info.ulClassofDevice);
 		lua_rawseti(l, -2, i++);
 
 		next = BluetoothFindNextDevice(found_device, &device_info);
 	}
 	if (!BluetoothFindDeviceClose(found_device)) {
-		RETURN_ERROR(l, last_error())
+		RETURN_ERROR(l, last_error());
 	}
 	return 1;
 }
@@ -406,7 +404,7 @@ static int bt_findService(lua_State *l) {
 	status = WSALookupServiceBegin(qs, flags, &h);
 	if (SOCKET_ERROR == status) {
 		free(qs);
-		RETURN_ERROR(l, last_wsa_error())
+		RETURN_ERROR(l, last_wsa_error());
 	}
 
 	// table to return all the service records
@@ -427,7 +425,7 @@ static int bt_findService(lua_State *l) {
 				continue;
 			}
 			free(qs);
-			RETURN_ERROR(l, format_error(error))
+			RETURN_ERROR(l, format_error(error));
 		}
 		//trace("Host: %s\n", addr);
 		trace("Name: %s\n", qs->lpszServiceInstanceName);
@@ -435,9 +433,9 @@ static int bt_findService(lua_State *l) {
 
 		// table for this service record
 		lua_newtable(l);
-		SET_TABLE_KEY_STRING(l, "name", qs->lpszServiceInstanceName)
+		SET_TABLE_KEY_STRING(l, "name", qs->lpszServiceInstanceName);
 		if (strlen(qs->lpszComment) > 0) {
-			SET_TABLE_KEY_STRING(l, "description", qs->lpszComment)
+			SET_TABLE_KEY_STRING(l, "description", qs->lpszComment);
 		}
 
 		csinfo = qs->lpcsaBuffer;
@@ -447,12 +445,12 @@ static int bt_findService(lua_State *l) {
 			trace(" Port: %d\n", port);
 			if( proto == BTHPROTO_RFCOMM ) {
 				trace(" Protocol: %s\n", "RFCOMM");
-				SET_TABLE_KEY_STRING(l, "protocol", BT_PROTO_KEY_RFCOMM)
-				SET_TABLE_KEY_INTEGER(l, "port", port)
+				SET_TABLE_KEY_STRING(l, "protocol", BT_PROTO_KEY_RFCOMM);
+				SET_TABLE_KEY_INTEGER(l, "port", port);
 			} else if( proto == BTHPROTO_L2CAP ) {
 				trace(" Protocol: %s\n", "L2CAP");
-				SET_TABLE_KEY_STRING(l, "protocol", BT_PROTO_KEY_L2CAP)
-				SET_TABLE_KEY_INTEGER(l, "port", port)
+				SET_TABLE_KEY_STRING(l, "protocol", BT_PROTO_KEY_L2CAP);
+				SET_TABLE_KEY_INTEGER(l, "port", port);
 			} else {
 				trace(" Protocol: %s\n", "UNKNOWN");
 			}

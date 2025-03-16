@@ -1,5 +1,3 @@
-#include "luamod.h"
-
 #include <errno.h>
 #include <string.h>
 
@@ -119,7 +117,7 @@ static int bt_socket(lua_State *l) {
 	trace("bt_socket(%d, %d) => %d\n", type, proto, sockfd);
 	if (sockfd < 0) {
 		trace("Fail to create socket type: %d, proto: %d\n", type, proto);
-		RETURN_ERROR(l, strerror(errno))
+		RETURN_ERROR(l, strerror(errno));
 	}
 	lua_pushinteger(l, sockfd);
 	return 1;
@@ -154,7 +152,7 @@ static int _check_sockaddr(lua_State *l, int index, int proto, struct sockaddr *
 		}
 	default:
 		//return luaL_error(l, "Unsupported protocol");
-		RETURN_ERROR(l, "Unsupported protocol")
+		RETURN_ERROR(l, "Unsupported protocol");
 	}
 	return 0;
 }
@@ -170,9 +168,9 @@ static int bt_bind(lua_State *l) {
 	}
 	if (bind(sockfd, (struct sockaddr *) &sa, sizeof(sa)) < 0) {
 		trace("Fail to bind socket\n");
-		RETURN_ERROR(l, strerror(errno))
+		RETURN_ERROR(l, strerror(errno));
 	}
-	RETURN_SUCCESS(l)
+	RETURN_SUCCESS(l);
 }
 
 static int bt_connect(lua_State *l) {
@@ -186,24 +184,24 @@ static int bt_connect(lua_State *l) {
 	}
 	if (connect(sockfd, (struct sockaddr *) &sa, sizeof(sa)) < 0) {
 		trace("Fail to connect socket\n");
-		RETURN_ERROR(l, strerror(errno))
+		RETURN_ERROR(l, strerror(errno));
 	}
-	RETURN_SUCCESS(l)
+	RETURN_SUCCESS(l);
 }
 
 static int bt_closesocket(lua_State *l) {
 	int sockfd = luaL_checkinteger(l, 1);
 	trace("bt_closesocket(%d)\n", sockfd);
 	close(sockfd);
-	RETURN_SUCCESS(l)
+	RETURN_SUCCESS(l);
 }
 
 static int bt_getDeviceInfo(lua_State *l) {
-	RETURN_SUCCESS(l)
+	RETURN_SUCCESS(l);
 }
 
 static int bt_discoverRadios(lua_State *l) {
-	RETURN_SUCCESS(l)
+	RETURN_SUCCESS(l);
 }
 
 static int bt_discoverDevices(lua_State *l) {
@@ -219,19 +217,19 @@ static int bt_discoverDevices(lua_State *l) {
 	devId = hci_get_route(NULL);
 	if (devId < 0) {
 		trace("No available Bluetooth device\n");
-		RETURN_ERROR(l, strerror(errno))
+		RETURN_ERROR(l, strerror(errno));
 	}
 	trace("Discovering devices using route %d...\n", devId);
 	// this function opens a socket connection to the microcontroller on the specified local Bluetooth adapter
 	sock = hci_open_dev(devId);
 	if (sock < 0) {
 		trace("Fail to open Bluetooth device socket\n");
-		RETURN_ERROR(l, strerror(errno))
+		RETURN_ERROR(l, strerror(errno));
 	}
 	ii = (inquiry_info*)malloc(max_rsp * sizeof(inquiry_info));
 	if (ii == NULL) {
 		close(sock);
-		RETURN_ERROR(l, "Fail to allocate inquiry info")
+		RETURN_ERROR(l, "Fail to allocate inquiry info");
 	}
 	trace("Start discovering devices using timeout %d...\n", len);
 	num_rsp = hci_inquiry(devId, len, max_rsp, NULL, &ii, flags);
@@ -239,7 +237,7 @@ static int bt_discoverDevices(lua_State *l) {
 		free(ii);
 		close(sock);
 		trace("Fail to discover Bluetooth devices\n");
-		RETURN_ERROR(l, strerror(errno))
+		RETURN_ERROR(l, strerror(errno));
 	}
 	// table to return all the devices
 	lua_newtable(l);
@@ -255,9 +253,9 @@ static int bt_discoverDevices(lua_State *l) {
 		trace(" Class: 0x%08x\n", dev_class);
 		// table for this device
 		lua_newtable(l);
-		SET_TABLE_KEY_STRING(l, "name", name)
-		SET_TABLE_KEY_STRING(l, "address", addr)
-		SET_TABLE_KEY_INTEGER(l, "class", dev_class)
+		SET_TABLE_KEY_STRING(l, "name", name);
+		SET_TABLE_KEY_STRING(l, "address", addr);
+		SET_TABLE_KEY_INTEGER(l, "class", dev_class);
 		lua_rawseti(l, -2, i + 1);
 	}
 	free(ii);
@@ -304,11 +302,11 @@ static int bt_findService(lua_State *l) {
 			sdp_record_t *rec = (sdp_record_t*) r->data;
 			if (!sdp_get_service_name(rec, buf, sizeof(buf))) {
 				trace("Name: \"%s\"\n", buf);
-				SET_TABLE_KEY_STRING(l, "name", buf)
+				SET_TABLE_KEY_STRING(l, "name", buf);
 			}
 			if (!sdp_get_service_desc(rec, buf, sizeof(buf))) {
 				trace(" Description: \"%s\"\n", buf);
-				SET_TABLE_KEY_STRING(l, "description", buf)
+				SET_TABLE_KEY_STRING(l, "description", buf);
 			}
 			// get a list of the protocol sequences
 			if( sdp_get_access_protos(rec, &proto_list) == 0 ) {
@@ -316,13 +314,13 @@ static int bt_findService(lua_State *l) {
 				// get the RFCOMM port number
 				port = sdp_get_proto_port(proto_list, RFCOMM_UUID);
 				if (port != 0) {
-					SET_TABLE_KEY_STRING(l, "protocol", BT_PROTO_KEY_RFCOMM)
-					SET_TABLE_KEY_INTEGER(l, "port", port)
+					SET_TABLE_KEY_STRING(l, "protocol", BT_PROTO_KEY_RFCOMM);
+					SET_TABLE_KEY_INTEGER(l, "port", port);
 				} else {
 					port = sdp_get_proto_port(proto_list, L2CAP_UUID);
 					if (port != 0) {
-						SET_TABLE_KEY_STRING(l, "protocol", BT_PROTO_KEY_L2CAP)
-						SET_TABLE_KEY_INTEGER(l, "port", port)
+						SET_TABLE_KEY_STRING(l, "protocol", BT_PROTO_KEY_L2CAP);
+						SET_TABLE_KEY_INTEGER(l, "port", port);
 					}
 				}
 				// sdp_get_access_protos allocates data on the heap for the

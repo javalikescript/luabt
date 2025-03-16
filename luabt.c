@@ -1,6 +1,8 @@
+#if LUA_VERSION_NUM < 503
+#include "lua-compat/compat.h"
+#endif
 
-//#define JLS_LUA_MOD_TRACE 1
-#include "luamod.h"
+#include "lua-compat/luamod.h"
 
 #ifdef WIN32
 #include "luabt_windows.c"
@@ -10,16 +12,16 @@
 
 static int bt_load(lua_State *l) {
   if (!bt_startup()) {
-    RETURN_ERROR(l, "Fail to startup bt")
+    RETURN_ERROR(l, "Fail to startup bt");
   }
-	RETURN_SUCCESS(l)
+	RETURN_SUCCESS(l);
 }
 
 static int bt_unload(lua_State *l) {
   if (!bt_cleanup()) {
-    RETURN_ERROR(l, "Fail to cleanup bt")
+    RETURN_ERROR(l, "Fail to cleanup bt");
   }
-	RETURN_SUCCESS(l)
+	RETURN_SUCCESS(l);
 }
 
 LUALIB_API int luaopen_bt(lua_State *l) {
